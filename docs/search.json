@@ -1,16 +1,65 @@
 [
   {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "Natalie Mayer",
+    "section": "",
+    "text": "Hi and welcome to my website! I’m Natalie, a Master’s student at the Bren School of Environmental Science and Management specializing in Water Resources Management. Profesionally, I am interested in analyzing water supply and quality data using Excel, RStudio, or ArcGIS! Outside of work, I enjoy hiking and going to the beach with my Australian Shepherd, Polly. Please explore this website to checkout some of my work!"
+  },
+  {
+    "objectID": "willamette_falls.html",
+    "href": "willamette_falls.html",
+    "title": "Willamette Falls Fish Passage",
+    "section": "",
+    "text": "This report includes population data on Coho, Jack Coho, and Steelhead fish collected daily at the Willamette Falls fish ladder between 2001-2010. The plots below illustrate both the seasonality of fish species migrating through Willamette Falls and the general trend in population size over the ten year period. Also included is a forecasting model used to predict Coho Salmon population from 2010-2025."
+  },
+  {
+    "objectID": "willamette_falls.html#overview",
+    "href": "willamette_falls.html#overview",
+    "title": "Willamette Falls Fish Passage",
+    "section": "",
+    "text": "This report includes population data on Coho, Jack Coho, and Steelhead fish collected daily at the Willamette Falls fish ladder between 2001-2010. The plots below illustrate both the seasonality of fish species migrating through Willamette Falls and the general trend in population size over the ten year period. Also included is a forecasting model used to predict Coho Salmon population from 2010-2025."
+  },
+  {
+    "objectID": "willamette_falls.html#data",
+    "href": "willamette_falls.html#data",
+    "title": "Willamette Falls Fish Passage",
+    "section": "2 Data",
+    "text": "2 Data\nU.S. Army Corps of Engineers, NWD and Chelan, Douglas and Grant County PUDs, Yakima Klickitat Fisheries Project, Colville Tribes Fish & Wildlife (OBMEP), Oregon Department of Fish & Wildlife, Washington Department of Fish & Wildlife. 2010. Columbia River DART Adult Passage Counts Graphic & Text. WFF-Willamette Falls [2001]. Columbia Basin Research. University of Washington School of Aquatic and Fishery Sciences. https://www.cbr.washington.edu/dart/query/adult_graph_text\n\n\n\nWillamette Falls Fish Ladder by Karim Delgado\n\n\n\n\nCode\n# load libraries\n\nlibrary(tidyverse)\nlibrary(here)\nlibrary(janitor)\nlibrary(patchwork)\nlibrary(tsibble)\nlibrary(feasts)\nlibrary(fable)\nlibrary(dplyr)\n\n\n\n\nCode\n# load and clean data\n\nfish_data &lt;- read_csv(here('data', 'willamette_fish_passage.csv'))\n\nfish_df &lt;- fish_data %&gt;%\n  clean_names() %&gt;%\n  mutate(date = lubridate:: mdy(date)) %&gt;%\n  select(date, coho, jack_coho, steelhead) %&gt;%\n  replace_na(list(coho=0, jack_coho=0, steelhead=0))\n\n\n\n\nCode\n# convert to time series\n\nfish_ts &lt;- fish_df %&gt;%\n  as_tsibble(key = NULL, \n             index = date)"
+  },
+  {
+    "objectID": "willamette_falls.html#part-1-original-time-series",
+    "href": "willamette_falls.html#part-1-original-time-series",
+    "title": "Willamette Falls Fish Passage",
+    "section": "3 Part 1: Original Time Series",
+    "text": "3 Part 1: Original Time Series\n\nThe time series below shows a steady increase in Coho individuals between 2001-2010, with population size surpassing 1000 individuals around 2010.\nJack coho populations remained relatively constant, apart from a notable peak at about 400 individuals in 2009.\nSteelhead populations have a seasonal but persistent presence at the Willamette Falls fish ladder, whereas both Coho and Jack coho are only observed there during specific small windows of the year.\n\n\n\nCode\n# plot time series for each species \n\ncoho &lt;- ggplot(fish_ts, aes(x = date)) + \n  geom_line(aes(y = coho)) +\n  theme_minimal() + \n  labs(x = \" \", \n       y = \"Coho\")\n\njack &lt;- ggplot(fish_ts, aes(x = date)) +\n  geom_line(aes(y = jack_coho)) +\n  theme_minimal() + \n    labs(x = \" \", \n       y = \"Jack Coho\")\n\nsteel &lt;- ggplot(fish_ts, aes(x = date)) +\n  geom_line(aes(y=steelhead)) +\n  theme_minimal() + \n    labs(x = \"Year\", \n       y = \"Steelhead\")\n\nfish_graph &lt;- coho / jack / steel + \n  plot_annotation(title = \"Fish Observed at the Willamette Falls Fish Ladder from 2001-2010\" ,\n                  caption = \"The x axis represents time in years between 2001-2010. Note the difference in magnitude of the y axes; the top \ngraph showing population is measured for Coho salmon by intervals of 500, the middle graph showing population \ntrends for Jack Coho salmon increases by intervals of 50, and the bottom graph showing population trends for \nSteelhead increases by intervals of 100.\",\n                  theme = theme(plot.title = element_text(size = 14, hjust = 0.5), \n                                plot.caption = element_text(hjust = 0.5)))\n\nfish_graph"
+  },
+  {
+    "objectID": "willamette_falls.html#part-2-seasonplots",
+    "href": "willamette_falls.html#part-2-seasonplots",
+    "title": "Willamette Falls Fish Passage",
+    "section": "4 Part 2: Seasonplots",
+    "text": "4 Part 2: Seasonplots\n\nCoho and Jack coho are observed at the Willamette Falls fish ladder exclusively in and around October each year, whereas Steelhead are observed there year-round with peaks between mid spring to mid summer.\nThe number of Coho individuals observed in the fall each year has increased between 2001-2010.\nJack coho population appears to steadily rise to a peak in 2009 followed by population decline.\n\n\n\nCode\n# make individual time series for each fish species \n\ncoho_ts &lt;- fish_df %&gt;%\n  pivot_longer(\"coho\":\"steelhead\",\n               names_to = \"species\", \n               values_to = \"count\") %&gt;%\n  filter(species == \"coho\") %&gt;%\n    as_tsibble(key = NULL, \n             index = date)\n\njack_ts &lt;- fish_df %&gt;%\n  pivot_longer(\"coho\":\"steelhead\",\n               names_to = \"species\", \n               values_to = \"count\") %&gt;%\n  filter(species == \"jack_coho\") %&gt;%\n    as_tsibble(key = NULL, \n             index = date)\n\nsteel_ts &lt;- fish_df %&gt;%\n  pivot_longer(\"coho\":\"steelhead\",\n               names_to = \"species\", \n               values_to = \"count\") %&gt;%\n  filter(species == \"steelhead\") %&gt;%\n    as_tsibble(key = NULL, \n             index = date)\n             \n# create season plots \n\ncoho_season &lt;- coho_ts %&gt;%\n  gg_season(y = count, \n            pal = rainbow(n=9)) +\n  theme_light() + \n  labs(x = \" \", \n       y = \"Coho\") + \n  theme(legend.position = \"none\")\n\njack_season &lt;- jack_ts %&gt;%\n  gg_season(y = count, \n            pal = rainbow(n=9)) +\n  theme_light() + \n  labs(x = \" \", \n       y = \"Jack Coho\")\n\nsteel_season &lt;- steel_ts %&gt;%\n  gg_season(y = count, \n            pal = rainbow(n=9)) +\n  theme_light() + \n  labs(x = \"Year\", \n       y = \"Steelhead\") + \n  theme(legend.position = \"none\")\n\nfish_season &lt;- coho_season / jack_season / steel_season + \n  plot_annotation(caption = \"The plots above show the annual trends of fish species: coho (top), jack coho (center), and steelhead (bottom) \nat the Willamette Falls fish ladder from 2001-2010. The x axis shows time in months and the y axes show counts of \nindividuals of each species. Note the different y-axes scales; Coho population is shown in intervals of 250, \nJack Coho in intervals of 50, and Steelhead 100. The colors represent each year between 2001-2010 with red representing \n2001 followed by a rainbow gradient where purple and pink represent the most recent years. \" , \n                  theme = theme(plot.caption = element_text(hjust = 0.5)))\n\nfish_season"
+  },
+  {
+    "objectID": "willamette_falls.html#part-3-annual-counts-by-species",
+    "href": "willamette_falls.html#part-3-annual-counts-by-species",
+    "title": "Willamette Falls Fish Passage",
+    "section": "5 Part 3: Annual counts by species",
+    "text": "5 Part 3: Annual counts by species\n\nNote the different y-axis scales in each of the figures below. Coho populations reach a maximum of over 250,000 individuals; Steelhead about 50,000; and Jack coho only about 3,000 individuals.\nCoho salmon population levels were relatively low between 2001-2008 followed by a significant jump in 2009 followed by a slight decline in 2010.\nJack coho populations experienced extreme fluctuations between 2001-2008. Whereas, steelhead populations appear relatively consistent if not slightly declining between 2001-2010.\n\n\n\nCode\nfish_totals &lt;- fish_ts %&gt;%\n  separate(date, c('year', 'month', 'day')) %&gt;%\n  group_by(year) %&gt;%\n  summarise(Coho = sum(coho), \n            Jack_Coho = sum(jack_coho), \n            Steelhead = sum(steelhead)) %&gt;%\n  pivot_longer(\"Coho\":\"Steelhead\", \n               names_to = \"species\", \n               values_to = \"total\")\n\nfish_total_plot &lt;- ggplot(data = fish_totals, \n       aes(x = year, \n           y = total, \n           fill = species)) + \n  geom_col() + \n  facet_wrap(~species, ncol=1, scales = \"free\") + \n  labs(x = \"Year\", \n       y = \"Total Fish at Fish Ladder\", \n       fill = \"Fish Species\", \n       caption = \"The figures above show the annual totals for fish passage at the Willamette fish lader from 2001-2010. \nThe top graph (red) represents coho salmon, the center graph (green) represents jack coho salmon, and the \nbottom graph (blue) represents steelhead. The x axis shows time in years, and the y axes represent number \nof individuals for each species. Note the different y-axes scales for the different species;  Coho population \nis shown in intervals of 2500, Jack Coho in intervals of 500, and Steelhead 5000\") + \n  theme(plot.caption = element_text(hjust = 0.5))\n\nplot(fish_total_plot)"
+  },
+  {
+    "objectID": "willamette_falls.html#optional-forecast-salmon-runs-with-holt-winters",
+    "href": "willamette_falls.html#optional-forecast-salmon-runs-with-holt-winters",
+    "title": "Willamette Falls Fish Passage",
+    "section": "6 Optional: Forecast Salmon runs with Holt-Winters",
+    "text": "6 Optional: Forecast Salmon runs with Holt-Winters\n\n\nCode\n# create model \n\ncoho_month_df &lt;- fish_df %&gt;%\n  separate(date, c('year', 'month', 'day')) %&gt;%\n  mutate(yearmonth = paste(year, month, sep = \"-\"), \n         date = yearmonth(yearmonth)) %&gt;%\n  select(date, coho) %&gt;%\n  group_by(date) %&gt;%\n  summarise(count = sum(coho))\n\ncoho_month_ts &lt;- coho_month_df %&gt;%\n  as_tsibble(key = NULL, \n             index = date) \n\ncoho_fit &lt;- coho_month_ts %&gt;%\n  model(ets = ETS(count ~ season(method = \"A\") + trend(method = \"A\")))\n\ncoho_forecast &lt;- coho_fit %&gt;%\n  forecast(h = \"15 years\") \n\ncoho_forecast %&gt;%\n  autoplot(coho_month_ts)"
+  },
+  {
     "objectID": "about.html",
     "href": "about.html",
     "title": "About",
     "section": "",
     "text": "About this site\n\n1 + 1\n\n[1] 2"
-  },
-  {
-    "objectID": "index.html",
-    "href": "index.html",
-    "title": "Natalie Mayer",
-    "section": "",
-    "text": "Hi and welcome to my website! I’m Natalie, a Master’s student at the Bren School of Environmental Science and Management specializing in Water Resources Management. Profesionally, I am interested in analyzing water supply and quality data using Excel, RStudio, or ArcGIS! Outside of work, I enjoy hiking and going to the beach with my Australian Shepherd, Polly. Please peruse my website to learn more!"
   }
 ]
