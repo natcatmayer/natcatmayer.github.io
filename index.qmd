@@ -1,11 +1,20 @@
 ---
-title: "natcatmayer.github.io"
+title: "Natalie Mayer"
+image: media/profile.jpeg
+about: 
+  template: jolla
+  image-shape: round 
+  image-width: 17em
+  links:
+  - icon: linkedin
+    text: LinkedIn
+    href: https://www.linkedin.com/in/natalie-mayer-a7aa0a299/
+  - icon: github
+    text: GitHub
+    href: https://github.com/natcatmayer
+  - icon: envelope
+    text: Email
+    href: mailto:nataliemayer@ucsb.edu
 ---
 
-This is a Quarto website.
-
-To learn more about Quarto websites visit <https://quarto.org/docs/websites>.
-
-```{r}
-1 + 1
-```
+Hi and welcome to my website! I'm Natalie, a Master's student at the Bren School of Environmental Science and Management specializing in Water Resources Management. Profesionally, I am interested in analyzing water supply and quality data using Excel, RStudio, or ArcGIS! Outside of work, I enjoy hiking and going to the beach with my Australian Shepherd, Polly. Please explore this website to checkout some of my work!

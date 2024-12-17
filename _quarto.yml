@@ -3,18 +3,23 @@ project:
   output-dir: docs
 
 website:
-  title: "natcatmayer.github.io"
+  title: "Natalie Mayer"
   navbar:
-    left:
+    right:
       - href: index.qmd
         text: Home
-      - about.qmd
+      - California Groundwater.qmd
+      - Cahokia-Joaquim Watershed.qmd
+      - Willamette Falls.qmd
+      - California Oil Spills.qmd
+      - Pictures in Nature.qmd
 
 format:
   html:
-    theme: cosmo
+    theme: yeti
     css: styles.css
     toc: true
+    page-layout: full
 
 editor: visual
 
