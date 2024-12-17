@@ -21,7 +21,7 @@ This report includes population data on Coho, Jack Coho, and Steelhead fish coll
 
 U.S. Army Corps of Engineers, NWD and Chelan, Douglas and Grant County PUDs, Yakima Klickitat Fisheries Project, Colville Tribes Fish & Wildlife (OBMEP), Oregon Department of Fish & Wildlife, Washington Department of Fish & Wildlife. 2010. Columbia River DART Adult Passage Counts Graphic & Text. WFF-Willamette Falls \[2001\]. Columbia Basin Research. University of Washington School of Aquatic and Fishery Sciences. https://www.cbr.washington.edu/dart/query/adult_graph_text
 
-![Willamette Falls Fish Ladder by Karim Delgado](fish-ladder.jpg){alt="Willamette Falls Fish Ladder by Karim Delgado" width="500"}
+![Willamette Falls Fish Ladder by Karim Delgado](fish-ladder.jpg){width="500"}
 
 ```{r setup}
 # load libraries
