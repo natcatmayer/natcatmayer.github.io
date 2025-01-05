@@ -8,8 +8,6 @@ website:
     right:
       - href: index.qmd
         text: Home
-      - href: about.qmd
-        text: About
       - href: portfolio.qmd
         text: Portfolio
       - href: files/resume.pdf
