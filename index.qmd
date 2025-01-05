@@ -2,7 +2,7 @@
 title: "Natalie Mayer"
 image: media/profile.jpeg
 about: 
-  template: jolla
+  template: trestles
   image-shape: round 
   image-width: 17em
   links:
@@ -17,4 +17,20 @@ about:
     href: mailto:nataliemayer@ucsb.edu
 ---
 
+## Welcome
+
 Hi and welcome to my website! I'm Natalie, a Master's student at the Bren School of Environmental Science and Management specializing in Water Resources Management. Profesionally, I am interested in analyzing water supply and quality data using Excel, RStudio, or ArcGIS! Outside of work, I enjoy hiking and going to the beach with my Australian Shepherd, Polly. Please explore this website to checkout some of my work!
+
+## Professional Interests
+
+Local Water Management \| Sustainable Groundwater Management \| Water Quality \| Ecosystem Services \| Nature Based Solutions \| Sustainable Agriculture
+
+## Recent & Ongoing Projects
+
+[Understanding and Mitigating Seaweed Forest Losses Caused by Environmental Change in New Zealand/Aotearoa](https://bren.ucsb.edu/projects/understanding-and-mitigating-seaweed-forest-losses-caused-environmental-change-new)
+
+[Southern California Groundwater Shiny App](https://natcatmayer.shinyapps.io/groundwatershinyapp/)
+
+[Cahokia-Joaquim Watershed Management Plan](https://drive.google.com/file/d/1MaEQLepDI2M4McatCBntKHbvlhE5MRch/view?usp=drive_link)
+
+[Land Use and Ownership in Critically Overdrafted Groundwater Basins in California](https://drive.google.com/file/d/1h_Clurky-hDjnG-fjOR-ahHq9WhcAY6P/view?usp=drive_link)

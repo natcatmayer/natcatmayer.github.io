@@ -1,0 +1,226 @@
+---
+title: "Binary Logistic Regression Models for Predicting Palmetto Species"
+author: "Natalie Mayer"
+image: spp1.jpg
+description: "Two binary logistic regression models were developed to predict the palmetto species based on a set of morphological features and compared."
+format: 
+  html:
+    embed-resources: true
+    code-fold: true
+    toc: true
+    number-sections: true
+editor: visual
+execute:
+    warning: false
+    message: false
+    echo: true
+---
+
+# Overview
+
+The dataset analyzed below contains information about two species of palmetto: saw palmetto (Serenoa repens) and scrub palmetto (Sabal etonia). Two binary logistic regression models were developed to predict the palmetto species based on a set of morphological features and compared. Model 1 predicts the species of an individual based on its plant height, canopy length, canopy width, and number of green leaves; whereas Model 2 predicts the species only based on plant height, canopy width and number of green leaves.
+
+Pseudocode:
+
+-   Load libraries and data, identify factor levels in metadata
+
+-   Visualize relationship between species and its predicting variable in exploratory ggplots
+
+-   Create binary logistic regression models using both formulas
+
+-   20-fold cross validation on model 1, repeat 10 times
+
+-   20-fold cross validation on model 2, repeat 10 times
+
+-   Compare models using AIC, accuracy, ROC curve and AUC
+
+-   Create table of best fitting model coefficients using kable
+
+-   Create table of best fitting predictive performance for the entire dataset
+
+Model 1 slightly outperforms Model 2, correctly predicting 90.75% of Serenoa repens and 92.61% of Sabal etonia. This suggests that the plant's canopy length (included in Model 1, but omitted in Model 2) is an essential predictive variable for differentiating between the two palmetto species.
+
+# Data
+
+Abrahamson, W.G. 2019. Survival, growth and biomass estimates of two dominant palmetto species of south-central Florida from 1981 - 2017, ongoing at 5-year intervals ver 1. Environmental Data Initiative. https://doi.org/10.6073/pasta/f2f96ec76fbbd4b9db431c79a770c4d5
+
+# Load libraries and data
+
+```{r set up}
+library(tidyverse)
+library(here)
+library(tidymodels)
+library(patchwork)
+library(kableExtra)
+
+palmetto <- read_csv(here('data', 'all_palmetto_data.csv'))
+palmetto_df <- palmetto %>%
+  select(species, height, length, width, green_lvs) %>%
+  mutate(species = factor(species))
+
+# 1 = Serenoa repens
+# 2 = Sabal etonia 
+
+
+```
+
+# Visualize Data
+
+```{r}
+#| label: fig-Palmetto
+#| fig-cap: "Serenoa repens (green) and Sabal etonia (gold) are two species of palmetto described in the figures above. Panel A shows their height distribution, Panel B shows the distribution of their canopy length, Panel C shows the distribution of their canopy width, and Panel D shows the number of green leaves found on individuals of each species."
+
+height <- ggplot(palmetto_df, aes(x = height, fill = factor(species))) + 
+  geom_bar() + 
+  labs(y = " ", x = "Plant Height", fill = "Species") + 
+  theme_minimal() + 
+  scale_fill_manual("Species", values = c("1" = "green4", "2" = "gold2"), 
+                    labels = c("1" = "Serenoa repens", "2" = "Sabal etonia")) 
+
+length <- ggplot(palmetto_df, aes(x = length, fill = factor(species))) + 
+  geom_bar() + 
+  labs(y = " ", x = "Canopy Length", fill = "Species") + 
+  theme_minimal() + 
+  scale_fill_manual("Species", values = c("1" = "green4", "2" = "gold2"), 
+                    labels = c("1" = "Serenoa repens", "2" = "Sabal etonia")) 
+
+width <- ggplot(palmetto_df, aes(x = width, fill = factor(species))) + 
+  geom_bar() + 
+  labs(y = " ", x = "Canopy Width", fill = "Species") + 
+  theme_minimal() + 
+  scale_fill_manual("Species", values = c("1" = "green4", "2" = "gold2"), 
+                    labels = c("1" = "Serenoa repens", "2" = "Sabal etonia"))
+
+green_lvs <- ggplot(palmetto_df, aes(x = green_lvs, fill = factor(species))) + 
+  geom_bar() + 
+  labs(y = " ", x = "Number of Green Leaves", fill = "Species") + 
+  theme_minimal() + 
+  scale_fill_manual("Species", values = c("1" = "green4", "2" = "gold2"), 
+                    labels = c("1" = "Serenoa repens", "2" = "Sabal etonia"))
+
+patch <- (height + length) / (width + green_lvs)
+patch + 
+  plot_annotation(tag_levels = 'A') + 
+  plot_layout(guides = "collect")
+```
+
+# Create Binary Logistic Regression Models
+
+The Aikaike Information Criterion (AIC) for Models 1 and 2 can be used to determine which model best fits the data. The AIC of Model 1 is 4690 and the AIC of Model 2 is 5391. The lower AIC of Model 1 indicates that it explains a greater amount of variation using the fewest possible independent variables compared to Model 2. In the section below, the two models will also be compared by accuracy and area under the curve.
+
+```{r test models}
+f1 <- species ~ height + length + width + green_lvs
+f2 <- species ~ height + width + green_lvs
+
+set.seed(143)
+p_split <- initial_split(palmetto_df, prop = 0.90, strata = species)
+
+p_train <- training(p_split)
+p_test <- testing(p_split)
+
+blr_mdl <- logistic_reg() %>%
+  set_engine('glm')
+
+blr1_fit <- blr_mdl %>%
+  fit(formula = f1, data = p_train)
+
+blr2_fit <- blr_mdl %>%
+  fit(formula = f2, data = p_train)
+
+blr1_fit
+blr2_fit
+
+```
+
+# Compare Models 1 & 2
+
+## Cross Validation for Model 1
+
+Model 1 was evaluated as a predictor for palmetto species using 20-fold cross validation repeated ten times, resulting in an accuracy = 91.7% and AUC = 97.3%.
+
+```{r}
+set.seed(99)
+p_folds <- vfold_cv(palmetto_df, v = 20, repeats = 10)
+p_folds
+
+
+
+blr_wf <- workflow() %>%
+  add_model(blr_mdl) %>%
+  add_formula(f1)
+
+blr_fit_folds <- blr_wf %>%
+  fit_resamples(p_folds)
+
+
+collect_metrics(blr_fit_folds)
+```
+
+## Cross Validation for Model 2
+
+Model 2 was also evaluated as a predictor for palmetto species using 20-fold cross validation repeated ten times, resulting in an accuracy = 89.8% and AUC = 96.3%.
+
+```{r}
+set.seed(99)
+p_folds <- vfold_cv(palmetto_df, v = 20, repeats = 10)
+p_folds
+
+
+blr_wf <- workflow() %>%
+  add_model(blr_mdl) %>%
+  add_formula(f2)
+
+blr_fit_folds <- blr_wf %>%
+  fit_resamples(p_folds)
+
+
+collect_metrics(blr_fit_folds)
+```
+
+# Re-evaluate Model 1 Using Entire Dataset
+
+Because Model 1 has a lower AIC, higher accuracy, and higher AUC, Model 1 explains more of the variation in the data than Model 2. In this section, Model 1 is re-evaluated using the entire dataset. Of the 12,267 palmetto individuals, Model 1 correctly identified 11,247 (accuracy = 91.7%). The receiving operating characteristic (ROC) curve and associated area under the curve (AUC) encompass 97.3% of the data variation.
+
+```{r}
+p_predict_1 <- palmetto_df %>%
+  mutate(predict(blr1_fit, new_data = .)) %>%
+  mutate(predict(blr1_fit, new_data = ., type = 'prob'))
+```
+
+```{r}
+table(p_predict_1 %>% select(species, .pred_class))
+```
+
+```{r}
+accuracy(p_predict_1, truth = species, estimate = .pred_class)
+```
+
+```{r}
+roc_df <- roc_curve(p_predict_1, truth = species, .pred_1)
+autoplot(roc_df)
+```
+
+```{r}
+auc_1 <- roc_auc(p_predict_1, truth = species, .pred_1)
+auc_1
+```
+
+```{r}
+blr1_fit %>%
+  broom::tidy() %>% 
+  mutate(p.value = ifelse(p.value <= 0.05, "<0.05")) %>%
+  kbl(digits = 2, align = NULL) %>%
+  kable_classic() 
+```
+
+```{r}
+tab <- matrix(c(6112, 6002, 90.75, 9.25, 6155, 6265, 92.61, 7.39), ncol=4, byrow=TRUE)
+colnames(tab) <- c('Observed','Predicted','Percent Correct', 'Percent Incorrect')
+rownames(tab) <- c("Serenoa repens", "Sabal etonia")
+
+tab <- as.table(tab)
+
+tab %>%
+  kbl() %>%
+  kable_classic()
+```

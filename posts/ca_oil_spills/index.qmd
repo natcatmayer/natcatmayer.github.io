@@ -1,0 +1,118 @@
+---
+title: "CA Oil Spills"
+author: "Natalie Mayer"
+image: oil-spills.png
+description: "Choropleth and interactive map of oil spills in California counties in 2008"
+format: 
+  html:
+    code-fold: show
+    toc: true
+    number-sections: true
+    embed-resources: true
+editor: visual
+execute:
+  echo: true
+  message: false
+  warning: false
+---
+
+# Overview
+
+The data includes records of all 3,237 documented oil spills that occurred in California in the year 2008, both off the coast in the ocean in addition to inland. Los Angeles County experienced 512 oil spills in 2008, the most spills of all the California counties, followed by San Diego with 418 oil spills and San Mateo County with 205 oil spills. Modoc County was the only to experience zero oil spills in 2008. The mean number of oil spills by county was about 53, and the median 16.5. This discrepancy in center measurements can be explained by Los Angeles and San Diego Counties experiencing significantly more oil spills than the rest of the counties, whereas 41 of the 58 counties fall below the mean.
+
+## Data
+
+California Fish and Wildlife. Updated October 24, 2023. Oil Spill Incident Tracking \[ds394\]. California State Geoportal. https://gis.data.ca.gov/datasets/CDFW::oil-spill-incident-tracking-ds394-1/explore?location=36.842021%2C-119.422009%2C6.74
+
+## Load libraries
+
+```{r setup}
+library(tidyverse)
+library(here)
+library(broom)
+library(janitor)
+library(sf)
+library(tmap)
+library(terra)
+library(tidyterra)
+library(gstat)
+library(stars)
+library(spatstat)
+```
+
+## Load and clean data
+
+```{r load data}
+oil_raw <- read_csv(here('data', 'Oil_Spill_Incident_Tracking_[ds394].csv'))
+
+oil_df <- oil_raw %>%
+  clean_names() %>%
+  select(x, y, objectid) %>%
+  drop_na()
+
+ca_counties <- read_sf(here('data', 'ca_counties', 'CA_Counties_TIGER2016.shp'))
+
+counties_sf <- ca_counties %>%
+  clean_names() %>%
+  select(name)
+
+```
+
+```{r}
+# convert oil to sf w/ same CRS as counties
+
+oil_sf <- oil_df %>%
+  st_as_sf(coords = c("x", "y"))
+
+st_crs(oil_sf) <- 3857
+```
+
+## Exploratory plots
+
+```{r}
+#| label: fig-ggplot
+#| fig-cap: Exploratory ggPlot
+
+ggplot() +
+  geom_sf(data = counties_sf) +
+  geom_sf(data = oil_sf) 
+```
+
+```{r}
+#| label: fig-exploratoryinteractivemap
+#| fig-cap: Exploratory Interactive Map
+
+tmap_mode(mode = 'view')
+
+tm_shape(counties_sf) + 
+  tm_fill("gray") + 
+  tm_shape(oil_sf) + 
+  tm_dots(col = "red")
+```
+
+## Create choropleth
+
+```{r}
+# spatial join 
+
+ca_oil <- st_join(counties_sf, oil_sf)
+
+```
+
+```{r}
+#| label: fig-Choropleth
+#| fig-cap: "This map of California is divided by county boundaries. The shade of brown represents the number of oil spill incidents that occurred within each county during the year 2008, darker shades representing more oil spill incidents and softer shades representing fewer oil spills. Offshore oil spills are counted towards the coastal county whose territory they occurred in."
+
+ca_oil_sf <- ca_oil %>%
+  group_by(name) %>%
+  summarize(n_records = sum(!is.na(objectid)))
+
+ggplot() + 
+  geom_sf(data = ca_oil_sf, 
+          aes(fill = n_records), 
+          color = "black", 
+          size = 1) + 
+  scale_fill_gradientn(colors = c('beige', 'tan', 'tan3', 'brown')) +
+  theme_minimal() + 
+  labs(fill = "Number of Oil Spill Incidents")
+```

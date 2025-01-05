@@ -1,0 +1,197 @@
+---
+title: "Text and Sentiment Analysis of Shrek Movie Script"
+author: "Natalie Mayer"
+image: shrek.jpg
+description: "Each line spoken by the four main characters: Shrek, Donkey, Fiona, and Lord Farquaad, were assessed to find the top 5 words said by each; and a sentiment analysis was conducted to determine how often each of the four main characters expressed different emotions"
+format: 
+  html:
+    code-fold: true
+    toc: true
+    numbered-sections: true
+    embed-resources: true
+editor: visual
+execute:
+  echo: true
+  message: false
+  warning: false
+---
+
+![Shrek](shrek.jpg)
+
+# Overview
+
+This report contains a text and sentiment analysis of the script of the first Shrek movie. Each line spoken by the four main characters: Shrek, Donkey, Fiona, and Lord Farquaad, were assessed to find the top 5 words said by each; and a sentiment analysis was conducted to determine how often each of the four main characters expressed different emotions. In Figure 1, a notable pattern is that these characters said each others' names relatively frequently. Donkey's first and second most used words were "Shrek" and "Fiona", Lord Farquaad's most used word was "Fiona", Fiona's most used word was "Shrek", and Shrek's most used words were "Donkey" and "Fiona". Note the different magnitudes on the x axis: Donkey speaks the most and his character is present throughout the entire movie. Shrek's character is present throughout the whole movie, but he doesn't talk as much as Donkey. Lord Farquaad only appears in a few scenes throughout the movie, and Fiona doesn't appear until more than halfway through the film. As shown in Figure 2, the sentiment analysis revealed that Donkey expresses more negative emotions than any other character. Note the different magnitudes on the y-axis; again, Donkey speaks significantly more words than the other characters. Surprisingly, Shrek's most common emotion was positivity and he only expresses anger in a small portion of his spoken lines. However, Shrek is a very sarcastic character, and it is likely that his sarcasm was misinterpreted in the sentiment analysis as positive expressions. Lord Farquaad and Fiona both most frequently express sentiments of positivity, joy and trust -- perhaps he was the more suitable match for the princess after all.
+
+## Data
+
+Elliott T., Rossio T., Stillman J., Schulman R. (2001). Shrek. https://script-pdf.s3-us-west-2.amazonaws.com/shrek-script-pdf.pdf
+
+```{r setup}
+library(tidyverse)
+library(tidytext)
+library(pdftools)
+library(ggwordcloud)
+library(patchwork)
+library(here)
+```
+
+```{r}
+shrek_text <- pdf_text(here('data', 'shrek-script-pdf.pdf'))
+```
+
+```{r}
+shrek_df <- data.frame(shrek_text) %>%
+  mutate(page = 1:n()) %>%
+  mutate(text = str_split(shrek_text, pattern = '\\n')) %>%
+  unnest(text) %>%
+  mutate(text = str_trim(text)) %>%
+  select(page, text)
+```
+
+```{r}
+shrek_lines <- shrek_df %>%
+  filter(page != 1) %>%
+  mutate(character = ifelse(str_detect(text, "SHREK") | 
+                            str_detect(text, "Allstar") |
+                            str_detect(text, "MAN1") |
+                            str_detect(text, "MEN") |
+                            str_detect(text, "GUARD") |
+                            str_detect(text, "DONKEY") |
+                            str_detect(text, "OLD WOMAN") |
+                            str_detect(text, "PINOCCHIO") |
+                            str_detect(text, "PETER PAN") |
+                            str_detect(text, "BLIND MOUSE1") |
+                            str_detect(text, "GORDO") |
+                            str_detect(text, "DWARF") |
+                            str_detect(text, "BIG BAD WOLF") |
+                            str_detect(text, "LITTLE PIG") |
+                            str_detect(text, "FARQUAAD") |
+                            str_detect(text, "GINGERBREAD MAN") |
+                            str_detect(text, "MIRROR") |
+                            str_detect(text, "THELONIUS") |
+                            str_detect(text, "CROWD")| 
+                            str_detect(text, "MAN") |
+                            str_detect(text, "WOODEN PEOPLE") |
+                            str_detect(text, "WOMAN") |
+                            str_detect(text, "FIONA") |
+                            str_detect(text, "ROBIN HOOD") |
+                            str_detect(text, "MERRY MEN")| 
+                            str_detect(text, "PRIEST"), 
+                            text, NA)) %>%
+  fill(character, .direction = 'down') %>%
+  filter(character == c("SHREK", "DONKEY", "FARQUAAD", "FIONA"))
+
+
+```
+
+```{r}
+shrek_words <- shrek_lines %>%
+  unnest_tokens(word, text)
+```
+
+```{r}
+shrek_wordcount <- shrek_words %>%
+  count(character, word)
+```
+
+```{r}
+# remove stopwords 
+
+wordcount_clean <- shrek_wordcount %>%
+  anti_join(stop_words, by = 'word')
+```
+
+```{r}
+top_5_words <- wordcount_clean %>%
+  group_by(character) %>%
+  arrange(-n) %>%
+  slice(2:6) %>%
+  ungroup()
+```
+
+```{r}
+#| label: fig-WordCount
+#| fig-cap: "Each graph above shows the five words most frequently said by the four main characters of the movie Shrek: Shrek, Donkey, Fiona, and Lord Farquaad. The y-axis displays each character's top five words, and the x-axis shows the count of how many times the character used that word throughout the movie. Note the different scales of x-axis between each of the characters. Donkey said his most common word 24 times, whereas Lord Farquaad only said his most common word 7 times during the movie."
+
+word_count_plot <- ggplot(data = top_5_words, 
+       aes(x = n, y = reorder(word, n))) + 
+  geom_col(fill = "green3") + 
+  facet_wrap(~character, scales = "free") + 
+  theme_minimal() + 
+  labs(x = "Number of Instances Word is Used", 
+       y = "Word")
+
+plot(word_count_plot)
+```
+
+```{r}
+# sentiment analysis
+
+nrc_lex <- get_sentiments(lexicon = "nrc")
+
+shrek_nrc <- shrek_words %>%
+  inner_join(nrc_lex, by = 'word')
+
+```
+
+```{r}
+nrc_counts <- shrek_nrc %>%
+  group_by(character, sentiment) %>%
+  summarize(n = n())
+
+nrc_shrek <- nrc_counts %>%
+  filter(character == "SHREK")
+
+nrc_donkey <- nrc_counts %>%
+  filter(character == "DONKEY")
+
+nrc_fiona <- nrc_counts %>%
+  filter(character == "FIONA")
+
+nrc_farquaad <- nrc_counts %>%
+  filter(character == "FARQUAAD")
+```
+
+```{r}
+shrek_sentiment <- ggplot(data = nrc_shrek, 
+       aes(x = reorder(sentiment, -n), 
+           y = n)) + 
+  geom_col(fill = "green4") + 
+  labs(x = "Shrek", y = "Word Count") +
+  theme_minimal() + 
+  theme(axis.text.x = element_text(angle = 45))
+  
+donkey_sentiment <- ggplot(data = nrc_donkey, 
+       aes(x = reorder(sentiment, -n), 
+           y = n)) + 
+  geom_col(fill = "darkgrey") + 
+  labs(x = "Donkey", y = " ") +
+  theme_minimal() + 
+  theme(axis.text.x = element_text(angle = 45))
+
+fiona_sentiment <- ggplot(data = nrc_fiona, 
+       aes(x = reorder(sentiment, -n), 
+           y = n)) + 
+  geom_col(fill = "green2") + 
+  labs(x = "Fiona", y = " ") +
+  theme_minimal() + 
+  theme(axis.text.x = element_text(angle = 45))
+
+farquaad_sentiment <- ggplot(data = nrc_farquaad, 
+       aes(x = reorder(sentiment, -n), 
+           y = n)) + 
+  geom_col(fill = "maroon") + 
+  labs(x = "Lord Farquaad", y = "Word Count") +
+  theme_minimal() + 
+  theme(axis.text.x = element_text(angle = 45))
+
+
+```
+
+```{r}
+#| label: fig-SentA
+#| fig-cap: "Each graph shows the frequency in which each of the four main characters of Shrek expressed certain emotions throughout the movie. The x-axis lists the different sentiments measured, and the y-axis shows the count of how many words the character spoke that displayed a given sentiment. Note the different scales of y-axis between each of the characters. Donkey is a chatty character that is present throughout the entire movie, whereas Fiona is less talkative and does not appear until the end of the film. Therefore, Donkey says many more words throughout the film and his word counts are higher for each of the measured sentiments. The colors correspond to the characters' appearances: Shrek is a green ogre, Fiona is a slightly softer green in her ogre form, donkey is gray, and Lord Farquaad wears a maroon outfit."
+
+patch <- (shrek_sentiment + donkey_sentiment) / (farquaad_sentiment + fiona_sentiment) 
+patch
+```
