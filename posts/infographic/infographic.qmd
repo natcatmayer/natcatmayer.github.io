@@ -1,0 +1,530 @@
+---
+title: "Navigating California's Water Rights"
+author: "Natalie Mayer"
+format: 
+  html:
+    embed-resources: true
+editor: visual
+---
+
+#### Introduction
+
+California’s water rights system is a product of the state's history, precipitation variability and scarcity, and competing socioeconomic demands. As one of the most water-stressed states in the United States, California faces ongoing challenges in balancing the needs of cities, farms, and ecosystems—especially during drought years. Water has shaped the state’s development for centuries, from fueling the Gold Rush economy to sustaining one of the world’s most productive agricultural industries and providing drinking water for millions of residents.
+
+However, access to water is not equal. Those who hold the oldest, most senior water rights have a significant advantage, often dictating how water is distributed and who gets cut off first in times of shortage.
+
+This led me to explore the question: **How does California’s water rights system influence water availability and allocation across different sectors?** Specifically,
+
+1.  How does California’s legal framework for water rights compare to other states?
+
+2.  Which water use sectors hold the most senior (older) rights?
+
+3.  How has water appropriation for different sectors grown between 1930 and 1999?
+
+To answer these, I analyzed data from the **Har-DWR Cumulative Water Rights Curves (Lisk et al. 2023)**, which aggregated appropriated water flow rights by designated use in California. By visualizing this data, my goal is to highlight the uniqueness of California’s water rights system and reveal how historical water policies continue to shape who gets water—and who doesn’t—today.
+
+```{r}
+#| eval: true
+#| echo: false
+#| message: false
+#| warning: false
+
+
+library(tidyverse)
+library(here)
+library(janitor)
+library(lubridate)
+library(stringr)
+library(ggtext)
+
+ca_rights <- read_csv(here("data", "california.csv"))
+```
+
+#### Plot 1: Water rights legal frameworks in each state in the U.S.
+
+My first graphic is a choropleth in which the colors represent the legal framework that governs water right appropriations in each of the United States. This figure is meant to highlight that California's legal framework is unique from the rest of the country. In general, eastern states operate under a riparian rights system and western states use prior appropriation. California is the only state that with existing water rights based on both legal systems.
+
+The only text I included in this figure on the final infographic is the legend. I opted to remove the title and subtitle because it was redundant to other text present in the infographic. I chose the colors with the intention of highlighting California apart from the other states. I wanted to make California gold, because the history of the water rights system in the state is closely tied to its history, in particular the Gold Rush in the late 1800s. I chose a deeper green to represent the riparian states, because this legal framework is more appropriate for regions where water is abundant, and a lighter and less-saturated green to represent western states that operate under prior appropriation where water is often scarce. In selecting these colors, I also considered accessibility, aiming to maximize contrast and use colorblind-friendly palettes. I used a void theme to maximize simplicity by removing unnecessary grid lines and background elements, guiding the viewer to focus on the spatial patterns displayed in the choropleth.
+
+The data used to create this map comes from Table 2.4 Framework of Western Surface Water Law and Table 2.5 Framework of Eastern Surface Water Law in Chapter 2 of "A Twenty-First Century US Water Policy" by Juliet Christian-Smith and Peter H. Gleick.
+
+```{r}
+#| eval: true
+#| echo: false
+#| message: false
+#| warning: false
+
+
+library(sf)
+
+# load shapefile of US
+shapefile <- read_sf(here("data", 
+                          "shapefile", 
+                          "s_18mr25.shp")) 
+
+# create df of legal frameworks for each state
+us_rights <- tibble(
+  NAME = c("Arizona", "Colorado", "Idaho", "Montana", "Nevada", "New Mexico", 
+            "Utah", "Wyoming", "Kansas", "North Dakota", "South Dakota", "Oregon", "Texas", 
+            "Washington", "Nebraska", "Oklahoma", "New Hampshire", "Vermont", "Rhode Island", 
+            "West Virginia", "Ohio", "Tennessee", "Missouri", "Louisiana", "Alabama", "Arkansas", 
+            "Connecticut", "Delaware", "New York", "New Jersey", "Maryland", "Illinois", 
+            "Indiana", "Iowa", "Kentucky", "Massachusetts", "Pennsylvania", "Mississippi", "Maine", "Michigan",
+            "Minnesota", "North Carolina", "South Carolina", "Georgia", "Florida", 
+            "Virginia", "Wisconsin", "California"),
+  legal_framework = c(rep("Prior appropriation", 16), 
+                        rep("Riparian", 31), 
+                        "Combination"))
+
+# join legal frameworks to shapefile
+usa_states_joined <- left_join(shapefile, us_rights, by = "NAME") %>%
+  drop_na(legal_framework) |>
+  st_transform("ESRI:102003")
+```
+
+```{r}
+#| eval: true
+#| echo: false
+#| message: false
+#| warning: false
+
+legal_framework_pal <- c("Riparian" = "#667b68", 
+                         "Prior appropriation" = "#a3b899", 
+                         "Combination" = "#ffcc5c") 
+
+ggplot() + 
+  geom_sf(data = usa_states_joined, 
+          aes(fill = legal_framework), 
+          color = "black", 
+          size = 1) + 
+  scale_fill_manual(values = legal_framework_pal) + 
+  theme_void() + 
+  labs(fill = "Legal Framework", 
+       title = "California has a unique legal framework for governing water rights", 
+       subtitle = "In 1914, California transitioned from a Riparian to Prior appropriation framework.\nPre-1914 water rights are the most senior and valuable water rights in the state") +
+  theme(legend.position = "bottom", 
+        plot.title = element_text(face = "bold"))
+  
+```
+
+#### Plot 2: CA water rights uses by decade
+
+My second graphic is a bar graph that shows the added water appropriations for different designated uses (domestic, environment, industrial, and agriculture) in each decade between the 1930s and 1990s. In California, older water rights are more senior. This means that in times of water scarcity, a regular occurrence in western U.S., those who own senior water rights will receive the entirety of their allotment while more junior water users will not receive any water at all. The purpose of this graphic is to show which sectors have most of the older water rights. In general, industry and domestic water rights are more senior to agriculture and environmental rights.
+
+To create this data visualization, I summed and aggregated appropriated water flow (CFS) into the four included designated uses for each decade. The descriptive title is color-coordinated, highlighting industrial and domestic uses, which have more rights and older rights than the other two categories. The subtitle reminds the viewer that older water rights are more senior and are prioritized when water is scarce to put the data into context. I also chose to modify the y-axis tick marks from the default "100000" to "100K" format to reduce the data-ink ratio and improve simplicity. I used the classic theme to create a clean, minimalistic design with axis lines that help guide the viewer's eye while focusing on the data.
+
+The colors selected to represent each of the designated uses was based the standard color palette of the National Land Cover Database. It is typical to see residential areas represented in red, industrial in a dark gray, and agriculture in tan. I opted to represent the environment as blue, because typically environmental water rights are used to maintain in-stream flow or keeping water in the creeks or rivers where they would otherwise be diverted to sustain riparian plants, fish and other aquatic species. In selecting these colors, I also considered accessibility, aiming to maximize contrast and use colorblind-friendly palettes.
+
+```{r}
+#| eval: true
+#| echo: false
+#| message: false
+#| warning: false
+
+# create color palette for water uses
+water_use_pal <- c("Domestic" = "#9b1b34", 
+                   "Environment" = "#93afce", 
+                   "Industrial" = "#4a4343", 
+                   "Agriculture" = "#d8a451")
+
+# group cfs by decade and water use
+ca_rights_use <- ca_rights %>%
+  clean_names() %>%
+  select(priority_date, cfs, water_use) %>%
+  mutate(date = mdy(priority_date)) %>%
+  mutate(date = if_else(year(date) > 2023, date - years(100), date)) %>%
+  mutate(year = year(date))%>%
+  filter(year > 1929) %>%
+  filter(year < 2000) %>%
+  mutate(decade = case_when(
+    year %in% (1930:1939) ~ "1930s", 
+    year %in% c(1940:1949) ~ "1940s", 
+    year %in% (1950:1959) ~ "1950s", 
+    year %in% c(1960:1969) ~ "1960s",
+    year %in% (1970:1979) ~ "1970s", 
+    year %in% c(1980:1989) ~ "1980s",
+    year %in% c(1990:1999) ~ "1990s"
+  )) %>%
+  select(decade, cfs, water_use) %>%
+  group_by(decade, water_use) %>%
+  summarise(cfs = sum(cfs)) %>%
+  ungroup() %>%
+  filter(water_use != "other") %>%
+  mutate(water_use = case_when(
+    water_use %in% c("livestock", "irrigation") ~ "Agriculture",
+    water_use %in% c("environmental", "fish") ~ "Environment",
+    water_use == "industrial" ~ "Industrial",
+    water_use == "domestic" ~ "Domestic")) %>%
+  drop_na() %>%
+  group_by(decade) %>%
+  arrange(decade, desc(cfs)) %>%
+  mutate(water_use = factor(water_use, levels = unique(water_use))) %>%
+  ungroup()
+
+# create bar chart of appropriated water for each use by decade
+ggplot(data = ca_rights_use, 
+       aes(x = decade, y = cfs, fill = water_use)) + 
+  geom_col(position = "dodge") + 
+  scale_fill_manual(values = water_use_pal) + 
+  scale_y_continuous(labels = scales::label_number(accuracy = 1, scale = 0.001, suffix = "K"),
+                     expand = c(0,0)) +
+  theme_classic() + 
+  labs(subtitle = "Older water rights are more senior and are prioritized when water is scarce", 
+       title = "Most California water rights are appropriated for <span style='color:#4a4343;'>industrial</span> and <span style='color:#9b1b34;'>domestic</span> use",
+       x = " ", 
+       y = "Appropriated Water (CFS)", 
+       fill = "Water Use",
+       caption = "Data Source: HarDWR - Cumulative Water Rights Curves (Lisk et al. 2023)") + 
+  theme(
+    plot.title.position = "plot",
+    plot.title = element_markdown(face = "bold"),
+    plot.caption = element_text(hjust = 1, face = "italic"),
+    
+    legend.position = "bottom", 
+    
+    axis.text = element_text(color = "black")) + 
+  coord_fixed(ratio = 0.00003)
+
+```
+
+#### Plot 3: Relative change in appropriated water volume and annual runoff
+
+My third and final graphic is a line graph which shows how the cumulative appropriated water flows has grown between 1930 and 1999 for each of the four designated uses (environment, agriculture, domestic, and industry). The purpose of this graphic is to show how water-intensive the growth of industry was in the 1900s compared to other sectors.
+
+For consistency, I kept the same color palette and classic theme that I used in Plot 2. I opted to use color-coded labels in place of a legend to reduce viewer eye movement. I also added qualitative y-axis labels and horizontal dotted lines to provide means of comparison for the viewer to interpret appropriated flow rates in cubic feet per second. I made these horizontal lines dotted, light gray, and behind the designated use lines, to indicate to the reader that this information is secondary should be looked at after observing the growth trends of each designated use.
+
+I used text in this figure includes a title, subtitle, and caption. I aimed for simplicity in the title because the graph has a lot of components and may be confusing to a viewer without prior knowledge of the subject matter. The subtitle points the viewer to consider the horizontal lines and qualitative axes labels that provide context to compare flow rates of California water rights to the flow out of the Oroville Dam, the tallest dam in the United States, and the Amazon River, the fastest river in the world.
+
+```{r}
+#| eval: true
+#| echo: false
+#| message: false
+#| warning: false
+
+# create a df of cumulative sum of appropriated cfs for each use by year
+ca_rights_ts <- ca_rights %>%
+  clean_names() %>%
+  select(priority_date, cfs, water_use) %>%
+  mutate(date = mdy(priority_date)) %>%
+  mutate(date = if_else(year(date) > 2023, date - years(100), date)) %>%
+  mutate(year = year(date)) %>%
+  filter(year > 1929) %>%
+  filter(year < 2000) %>%
+  group_by(year, water_use) %>%
+  summarise(cfs = sum(cfs)) %>%
+  ungroup() %>%
+  filter(water_use != "other") %>%
+  mutate(water_use = case_when(
+    water_use %in% c("livestock", "irrigation") ~ "Agriculture",
+    water_use %in% c("environmental", "fish") ~ "Environment",
+    water_use == "industrial" ~ "Industrial",
+    water_use == "domestic" ~ "Domestic"
+  )) %>%
+  arrange(water_use, year) %>%  
+  group_by(water_use) %>%     
+  mutate(agg_cfs = cumsum(cfs)) %>%  
+  ungroup()
+
+```
+
+```{r}
+#| eval: true
+#| echo: false
+#| message: false
+#| warning: false
+
+y_breaks <- c(36000, 100000, 200000, 300000, 400000)
+y_labels <- c("Max Flow from Oroville Dam", "100K", "200K", "300K", "Avg. Flow at Mouth of Amazon River")
+
+# create line graph showing growth in annual appropriations of water by designated use
+ggplot() + 
+  geom_hline(aes(yintercept = 36000), color = "lightgray", linetype = "dashed") + # max oroville dam cfs
+  geom_hline(aes(yintercept = 400000), color = "lightgray", linetype = "dashed") +
+  geom_line(data = ca_rights_ts, 
+            mapping = aes(x = year, y = agg_cfs, color = water_use), 
+            linewidth = 1) +
+  theme_classic() + 
+  scale_y_continuous(expand = c(0,0),
+                     breaks = y_breaks,
+                     labels = str_wrap(y_labels, width = 18)) +
+  scale_x_continuous(breaks = seq(min(ca_rights_ts$year), max(ca_rights_ts$year), by = 10), 
+                     expand = c(0,0)) + 
+  coord_fixed(ratio = 0.00008) + 
+  scale_color_manual(values = water_use_pal) +
+  labs(y = "Appropriated Water (CFS)", 
+       x = " ") + 
+  annotate(
+    geom = "text", 
+    x = 1993, 
+    y = 415000,
+    label = "Industrial",
+    size = 3.5,
+    color = "#4a4343") + 
+  annotate(
+    geom = "text", 
+    x = 1994, 
+    y = 255000,
+    label = "Domestic",
+    size = 3.5,
+    color = "#9b1b34") + 
+  annotate(
+    geom = "text", 
+    x = 1986, 
+    y = 190500,
+    label = "Environment",
+    size = 3.5,
+    color = "#93afce") + 
+  annotate(
+    geom = "text", 
+    x = 1992, 
+    y = 158000,
+    label = "Agriculture",
+    size = 3.5,
+    color = "#d8a451") + 
+  labs(title = "Growth of CA Appropriated Water Rights (1930-1999) by Beneficial Use",
+       subtitle = "Industrial water rights in California have the largest and fastest-growing appropriated flow,\nexceeding the average flow at the mouth of the Amazon River, the fastest river in the world.",
+       caption = "Data Source: HarDWR - Cumulative Water Rights Curves (Lisk et al. 2023)",
+       color = "Water Use") + 
+  theme(plot.title.position = "plot", 
+        plot.title = element_text(face = "bold"), 
+        plot.caption = element_text(hjust = 1, face = "italic"),
+        legend.position = "none",
+        
+        axis.text = element_text(color = "black"), 
+        axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0))
+        )
+```
+
+#### Putting it all together
+
+I created the infographic manually using Microsoft PowerPoint. I added each of the three figures to a blank slide and added supporting text, diagrams, and icons to highlight important takeaways and provide context to viewers.
+
+![](infographic.png)
+
+#### To view the code used to create each of the three figures, click the drop down arrows below
+
+###### Plot 1: Choropleth Map
+
+```{r}
+#| eval: false
+#| code-fold: true
+#| message: false
+#| warning: false
+
+
+library(sf)
+
+# load shapefile of US
+shapefile <- read_sf(here("data", 
+                          "shapefile", 
+                          "s_18mr25.shp")) 
+
+# create df of legal frameworks for each state
+us_rights <- tibble(
+  NAME = c("Arizona", "Colorado", "Idaho", "Montana", "Nevada", "New Mexico", 
+            "Utah", "Wyoming", "Kansas", "North Dakota", "South Dakota", "Oregon", "Texas", 
+            "Washington", "Nebraska", "Oklahoma", "New Hampshire", "Vermont", "Rhode Island", 
+            "West Virginia", "Ohio", "Tennessee", "Missouri", "Louisiana", "Alabama", "Arkansas", 
+            "Connecticut", "Delaware", "New York", "New Jersey", "Maryland", "Illinois", 
+            "Indiana", "Iowa", "Kentucky", "Massachusetts", "Pennsylvania", "Mississippi", "Maine", "Michigan",
+            "Minnesota", "North Carolina", "South Carolina", "Georgia", "Florida", 
+            "Virginia", "Wisconsin", "California"),
+  legal_framework = c(rep("Prior appropriation", 16), 
+                        rep("Riparian", 31), 
+                        "Combination"))
+
+# join legal frameworks to shapefile
+usa_states_joined <- left_join(shapefile, us_rights, by = "NAME") %>%
+  drop_na(legal_framework) |>
+  st_transform("ESRI:102003")
+
+
+legal_framework_pal <- c("Riparian" = "#667b68", 
+                         "Prior appropriation" = "#a3b899", 
+                         "Combination" = "#ffcc5c") 
+
+# create map
+ggplot() + 
+  geom_sf(data = usa_states_joined, 
+          aes(fill = legal_framework), 
+          color = "black", 
+          size = 1) + 
+  scale_fill_manual(values = legal_framework_pal) + 
+  theme_void() + 
+  labs(fill = "Legal Framework", 
+       title = "California has a unique legal framework for governing water rights", 
+       subtitle = "In 1914, California transitioned from a Riparian to Prior appropriation framework.\nPre-1914 water rights are the most senior and valuable water rights in the state") +
+  theme(legend.position = "bottom", 
+        plot.title = element_text(face = "bold"))
+  
+```
+
+###### Plot 2: Bar Graph
+
+```{r}
+#| eval: false
+#| code-fold: true
+#| message: false
+#| warning: false
+
+# create color palette for water uses
+water_use_pal <- c("Domestic" = "#9b1b34", 
+                   "Environment" = "#93afce", 
+                   "Industrial" = "#4a4343", 
+                   "Agriculture" = "#d8a451")
+
+# group cfs by decade and water use
+ca_rights_use <- ca_rights %>%
+  clean_names() %>%
+  select(priority_date, cfs, water_use) %>%
+  mutate(date = mdy(priority_date)) %>%
+  mutate(date = if_else(year(date) > 2023, date - years(100), date)) %>%
+  mutate(year = year(date))%>%
+  filter(year > 1929) %>%
+  filter(year < 2000) %>%
+  mutate(decade = case_when(
+    year %in% (1930:1939) ~ "1930s", 
+    year %in% c(1940:1949) ~ "1940s", 
+    year %in% (1950:1959) ~ "1950s", 
+    year %in% c(1960:1969) ~ "1960s",
+    year %in% (1970:1979) ~ "1970s", 
+    year %in% c(1980:1989) ~ "1980s",
+    year %in% c(1990:1999) ~ "1990s"
+  )) %>%
+  select(decade, cfs, water_use) %>%
+  group_by(decade, water_use) %>%
+  summarise(cfs = sum(cfs)) %>%
+  ungroup() %>%
+  filter(water_use != "other") %>%
+  mutate(water_use = case_when(
+    water_use %in% c("livestock", "irrigation") ~ "Agriculture",
+    water_use %in% c("environmental", "fish") ~ "Environment",
+    water_use == "industrial" ~ "Industrial",
+    water_use == "domestic" ~ "Domestic")) %>%
+  drop_na() %>%
+  group_by(decade) %>%
+  arrange(decade, desc(cfs)) %>%
+  mutate(water_use = factor(water_use, levels = unique(water_use))) %>%
+  ungroup()
+
+# create bar chart of appropriated water for each use by decade
+ggplot(data = ca_rights_use, 
+       aes(x = decade, y = cfs, fill = water_use)) + 
+  geom_col(position = "dodge") + 
+  scale_fill_manual(values = water_use_pal) + 
+  scale_y_continuous(labels = scales::label_number(accuracy = 1, scale = 0.001, suffix = "K"),
+                     expand = c(0,0)) +
+  theme_classic() + 
+  labs(subtitle = "Older water rights are more senior and are prioritized when water is scarce", 
+       title = "Most California water rights are appropriated for <span style='color:#4a4343;'>industrial</span> and <span style='color:#9b1b34;'>domestic</span> use",
+       x = " ", 
+       y = "Appropriated Water (CFS)", 
+       fill = "Water Use",
+       caption = "Data Source: HarDWR - Cumulative Water Rights Curves (Lisk et al. 2023)") + 
+  theme(
+    plot.title.position = "plot",
+    plot.title = element_markdown(face = "bold"),
+    plot.caption = element_text(hjust = 1, face = "italic"),
+    
+    legend.position = "bottom", 
+    
+    axis.text = element_text(color = "black")) + 
+  coord_fixed(ratio = 0.00003)
+
+```
+
+###### Plot 3: Line Graph
+
+```{r}
+#| eval: false
+#| code-fold: true
+#| message: false
+#| warning: false
+
+# create a df of cumulative sum of appropriated cfs for each use by year
+ca_rights_ts <- ca_rights %>%
+  clean_names() %>%
+  select(priority_date, cfs, water_use) %>%
+  mutate(date = mdy(priority_date)) %>%
+  mutate(date = if_else(year(date) > 2023, date - years(100), date)) %>%
+  mutate(year = year(date)) %>%
+  filter(year > 1929) %>%
+  filter(year < 2000) %>%
+  group_by(year, water_use) %>%
+  summarise(cfs = sum(cfs)) %>%
+  ungroup() %>%
+  filter(water_use != "other") %>%
+  mutate(water_use = case_when(
+    water_use %in% c("livestock", "irrigation") ~ "Agriculture",
+    water_use %in% c("environmental", "fish") ~ "Environment",
+    water_use == "industrial" ~ "Industrial",
+    water_use == "domestic" ~ "Domestic"
+  )) %>%
+  arrange(water_use, year) %>%  
+  group_by(water_use) %>%     
+  mutate(agg_cfs = cumsum(cfs)) %>%  
+  ungroup()
+
+
+
+y_breaks <- c(36000, 100000, 200000, 300000, 400000)
+y_labels <- c("Max Flow from Oroville Dam", "100K", "200K", "300K", "Avg. Flow at Mouth of Amazon River")
+
+# create line graph showing growth in annual appropriations of water by designated use
+ggplot() + 
+  geom_hline(aes(yintercept = 36000), color = "lightgray", linetype = "dashed") + # max oroville dam cfs
+  geom_hline(aes(yintercept = 400000), color = "lightgray", linetype = "dashed") +
+  geom_line(data = ca_rights_ts, 
+            mapping = aes(x = year, y = agg_cfs, color = water_use), 
+            linewidth = 1) +
+  theme_classic() + 
+  scale_y_continuous(expand = c(0,0),
+                     breaks = y_breaks,
+                     labels = str_wrap(y_labels, width = 18)) +
+  scale_x_continuous(breaks = seq(min(ca_rights_ts$year), max(ca_rights_ts$year), by = 10), 
+                     expand = c(0,0)) + 
+  coord_fixed(ratio = 0.00008) + 
+  scale_color_manual(values = water_use_pal) +
+  labs(y = "Appropriated Water (CFS)", 
+       x = " ") + 
+  annotate(
+    geom = "text", 
+    x = 1993, 
+    y = 415000,
+    label = "Industrial",
+    size = 3.5,
+    color = "#4a4343") + 
+  annotate(
+    geom = "text", 
+    x = 1994, 
+    y = 255000,
+    label = "Domestic",
+    size = 3.5,
+    color = "#9b1b34") + 
+  annotate(
+    geom = "text", 
+    x = 1986, 
+    y = 190500,
+    label = "Environment",
+    size = 3.5,
+    color = "#93afce") + 
+  annotate(
+    geom = "text", 
+    x = 1992, 
+    y = 158000,
+    label = "Agriculture",
+    size = 3.5,
+    color = "#d8a451") + 
+  labs(title = "Growth of CA Appropriated Water Rights (1930-1999) by Beneficial Use",
+       subtitle = "Industrial water rights in California have the largest and fastest-growing appropriated flow,\nexceeding the average flow at the mouth of the Amazon River, the fastest river in the world.",
+       caption = "Data Source: HarDWR - Cumulative Water Rights Curves (Lisk et al. 2023)",
+       color = "Water Use") + 
+  theme(plot.title.position = "plot", 
+        plot.title = element_text(face = "bold"), 
+        plot.caption = element_text(hjust = 1, face = "italic"),
+        legend.position = "none",
+        
+        axis.text = element_text(color = "black"), 
+        axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0))
+        )
+```
