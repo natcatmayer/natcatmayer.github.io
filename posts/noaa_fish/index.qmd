@@ -21,10 +21,12 @@ image: arctic_cod.png
 ![National Oceanic and Atmospheric Administration](noaa_logo.png)
 :::
 
-# Overview 
-Fish surveys were conducted near Pt. Barrow, Alaska to "measure seasonal changes in the distribution, demographics, trophic position and nutritional status of forage fish during the partial and complete ice-free season."  A variety of climate and water conditions were measured in addition to the fish count. The following analysis focuses on Arctic Cod (Boreogadus saida), and how its abundance varied with physical conditions such as: time of day, latitude, longitude, ocean surface temperature, ocean surface salinity, and windspeed. 
+# Overview
+
+Fish surveys were conducted near Pt. Barrow, Alaska to "measure seasonal changes in the distribution, demographics, trophic position and nutritional status of forage fish during the partial and complete ice-free season." A variety of climate and water conditions were measured in addition to the fish count. The following analysis focuses on Arctic Cod (Boreogadus saida), and how its abundance varied with physical conditions such as: time of day, latitude, longitude, ocean surface temperature, ocean surface salinity, and windspeed.
 
 # Data
+
 National Oceanic and Atmospheric Administration. (December 1, 2023). AFSC/ABL: ACES-SHELZFZ (Arctic Coastal Ecosystem Survey AND Shelf Habitat and EcoLogy of Fish and Zooplankton) Catch Database. https://catalog.data.gov/dataset/afsc-abl-aces-shelfz-arctic-coastal-ecosystem-survey-and-shelf-habitat-and-ecology-of-fish-and-1
 
 ::: {layout="[1,1]"}
@@ -32,7 +34,6 @@ National Oceanic and Atmospheric Administration. (December 1, 2023). AFSC/ABL: A
 
 ![Arctic Food Chain. Science Facts](Arctic-Food-Chain.jpg)
 :::
-
 
 # Load & Clean Data
 
@@ -87,7 +88,6 @@ arctic_cod_pca$rotation %>%
   kable_classic()
 ```
 
-
 ## Biplot
 
 ```{r}
@@ -120,8 +120,6 @@ autoplot +
 screeplot(arctic_cod_pca, type = 'barplot')
 ```
 
-# Summary 
-The screeplot shows that Principal Components 1 and 2 describe most of the variance in the data. According to the biplot, Principal Component 1 describes 39.67% and Principal Component 2 describe 29.09% of the variance in the data. Principal Component 1 is correlated with 50% latitude, 49% wind speed, 45% arctic cod abundance, 42% longitude, 32% surface salinity, and 16.5% surface temperature. Principal Component 2 is correlated with 58.5% surface salinity, 53.5% surface temperature, 51% longitude, 30% latitude, 15.5% wind speed, and 2.5% arctic cod abundance. In the biplot, surface salinity and surface temperature form a nearly 180 degree angle, showing that colder seawater is more saline than warmer seawater. The number of arctic cod individuals observed appears to correspond to the wind speed on the day of the survey. A possible explanation for this correlation is that greater wind speeds cause larger waves, increasing turbidity and the circulation of nutrients, and attracting more fish. 
+# Summary
 
-
-
+The screeplot shows that Principal Components 1 and 2 describe most of the variance in the data. According to the biplot, Principal Component 1 describes 39.67% and Principal Component 2 describe 29.09% of the variance in the data. Principal Component 1 is correlated with 50% latitude, 49% wind speed, 45% arctic cod abundance, 42% longitude, 32% surface salinity, and 16.5% surface temperature. Principal Component 2 is correlated with 58.5% surface salinity, 53.5% surface temperature, 51% longitude, 30% latitude, 15.5% wind speed, and 2.5% arctic cod abundance. In the biplot, surface salinity and surface temperature form a nearly 180 degree angle, showing that colder seawater is more saline than warmer seawater. The number of arctic cod individuals observed appears to correspond to the wind speed on the day of the survey. A possible explanation for this correlation is that greater wind speeds cause larger waves, increasing turbidity and the circulation of nutrients, and attracting more fish.
