@@ -8,7 +8,7 @@ editor: visual
 image: infographic.png
 ---
 
-#### Introduction
+### Introduction
 
 California’s water rights system is a product of the state's history, precipitation variability and scarcity, and competing socioeconomic demands. As one of the most water-stressed states in the United States, California faces ongoing challenges in balancing the needs of cities, farms, and ecosystems—especially during drought years. Water has shaped the state’s development for centuries, from fueling the Gold Rush economy to sustaining one of the world’s most productive agricultural industries and providing drinking water for millions of residents.
 
@@ -41,7 +41,7 @@ library(ggtext)
 ca_rights <- read_csv(here("data", "california.csv"))
 ```
 
-#### Plot 1: Water rights legal frameworks in each state in the U.S.
+### Plot 1: Water rights legal frameworks in each state in the U.S.
 
 My first graphic is a choropleth in which the colors represent the legal framework that governs water right appropriations in each of the United States. This figure is meant to highlight that California's legal framework is unique from the rest of the country. In general, eastern states operate under a riparian rights system and western states use prior appropriation. California is the only state that with existing water rights based on both legal systems.
 
@@ -108,7 +108,7 @@ ggplot() +
   
 ```
 
-#### Plot 2: CA water rights uses by decade
+### Plot 2: CA water rights uses by decade
 
 My second graphic is a bar graph that shows the added water appropriations for different designated uses (domestic, environment, industrial, and agriculture) in each decade between the 1930s and 1990s. In California, older water rights are more senior. This means that in times of water scarcity, a regular occurrence in western U.S., those who own senior water rights will receive the entirety of their allotment while more junior water users will not receive any water at all. The purpose of this graphic is to show which sectors have most of the older water rights. In general, industry and domestic water rights are more senior to agriculture and environmental rights.
 
@@ -188,7 +188,7 @@ ggplot(data = ca_rights_use,
 
 ```
 
-#### Plot 3: Relative change in appropriated water volume and annual runoff
+### Plot 3: Relative change in appropriated water volume and annual runoff
 
 My third and final graphic is a line graph which shows how the cumulative appropriated water flows has grown between 1930 and 1999 for each of the four designated uses (environment, agriculture, domestic, and industry). The purpose of this graphic is to show how water-intensive the growth of industry was in the 1900s compared to other sectors.
 
@@ -296,7 +296,7 @@ ggplot() +
         )
 ```
 
-#### Putting it all together
+### Putting it all together
 
 I created the infographic manually using Microsoft PowerPoint. I added each of the three figures to a blank slide and added supporting text, diagrams, and icons to highlight important takeaways and provide context to viewers.
 
@@ -304,7 +304,7 @@ I created the infographic manually using Microsoft PowerPoint. I added each of t
 
 #### To view the code used to create each of the three figures, click the drop down arrows below
 
-###### Plot 1: Choropleth Map
+##### Plot 1: Choropleth Map
 
 ```{r}
 #| eval: false
@@ -360,7 +360,7 @@ ggplot() +
   
 ```
 
-###### Plot 2: Bar Graph
+##### Plot 2: Bar Graph
 
 ```{r}
 #| eval: false
@@ -434,7 +434,7 @@ ggplot(data = ca_rights_use,
 
 ```
 
-###### Plot 3: Line Graph
+##### Plot 3: Line Graph
 
 ```{r}
 #| eval: false
