@@ -24,6 +24,10 @@ This led me to explore the question: **How does California’s water rights syst
 
 To answer these, I analyzed data from the **Har-DWR Cumulative Water Rights Curves (Lisk et al. 2023)**, which aggregated appropriated water flow rights by designated use in California. By visualizing this data, my goal is to highlight the uniqueness of California’s water rights system and reveal how historical water policies continue to shape who gets water—and who doesn’t—today.
 
+### Final Infographic
+
+![](infographic.png)
+
 ```{r}
 #| eval: true
 #| echo: false
@@ -43,11 +47,27 @@ ca_rights <- read_csv(here("data", "california.csv"))
 
 ### Plot 1: Water rights legal frameworks in each state in the U.S.
 
-My first graphic is a choropleth in which the colors represent the legal framework that governs water right appropriations in each of the United States. This figure is meant to highlight that California's legal framework is unique from the rest of the country. In general, eastern states operate under a riparian rights system and western states use prior appropriation. California is the only state that with existing water rights based on both legal systems.
+1.  **Graphic form:** My first graphic is a choropleth in which the colors represent the legal framework that governs water right appropriations in each of the United States.
 
-The only text I included in this figure on the final infographic is the legend. I opted to remove the title and subtitle because it was redundant to other text present in the infographic. I chose the colors with the intention of highlighting California apart from the other states. I wanted to make California gold, because the history of the water rights system in the state is closely tied to its history, in particular the Gold Rush in the late 1800s. I chose a deeper green to represent the riparian states, because this legal framework is more appropriate for regions where water is abundant, and a lighter and less-saturated green to represent western states that operate under prior appropriation where water is often scarce. In selecting these colors, I also considered accessibility, aiming to maximize contrast and use colorblind-friendly palettes. I used a void theme to maximize simplicity by removing unnecessary grid lines and background elements, guiding the viewer to focus on the spatial patterns displayed in the choropleth.
+2.  **Text:** The only text I included in this figure on the final infographic is the legend. I opted to remove the title and subtitle because it was redundant to other text present in the infographic.
 
-The data used to create this map comes from Table 2.4 Framework of Western Surface Water Law and Table 2.5 Framework of Eastern Surface Water Law in Chapter 2 of "A Twenty-First Century US Water Policy" by Juliet Christian-Smith and Peter H. Gleick.
+3.  **Theme:** I used a void theme to maximize simplicity by removing unnecessary grid lines and background elements, guiding the viewer to focus on the spatial patterns displayed in the choropleth.
+
+4.  **Typography:** I kept the default sans serif font, because there was a lot of text on the final infographic, and I thought this was the easiest font to read on a screen, which is where my infographic will be viewed.
+
+5.  **General Design:** In addition to setting the theme to void to reduce data-ink ratio and reduce information overload, I made sure that the legend order matched the geographic order of legal frameworks to reduce viewer eye movement and improve ease of interpretability.
+
+6.  **Context:** This figure is meant to highlight that California's legal framework is unique from the rest of the country. In general, eastern states operate under a riparian rights system and western states use prior appropriation.
+
+7.  **Primary message:** California is the only state that with existing water rights based on both legal systems. This is centered in the figure because California is a bright gold color, whereas the other states are shades of muted green.
+
+8.  **Colors:** I chose the colors with the intention of highlighting California apart from the other states. I wanted to make California gold, because the history of the water rights system in the state is closely tied to its history, in particular the Gold Rush in the late 1800s. I chose a deeper green to represent the riparian states, because this legal framework is more appropriate for regions where water is abundant, and a lighter and less-saturated green to represent western states that operate under prior appropriation where water is often scarce.
+
+9.  **Accessibility:** I considered color-blindness in selecting the colors by aiming to maximize contrast.
+
+10. **DEI lens:** This data does not represent people or communities, so I did not consider framing from a DEI perspective.
+
+    *The data used to create this map comes from Table 2.4 Framework of Western Surface Water Law and Table 2.5 Framework of Eastern Surface Water Law in Chapter 2 of "A Twenty-First Century US Water Policy" by Juliet Christian-Smith and Peter H. Gleick.*
 
 ```{r}
 #| eval: true
@@ -110,11 +130,16 @@ ggplot() +
 
 ### Plot 2: CA water rights uses by decade
 
-My second graphic is a bar graph that shows the added water appropriations for different designated uses (domestic, environment, industrial, and agriculture) in each decade between the 1930s and 1990s. In California, older water rights are more senior. This means that in times of water scarcity, a regular occurrence in western U.S., those who own senior water rights will receive the entirety of their allotment while more junior water users will not receive any water at all. The purpose of this graphic is to show which sectors have most of the older water rights. In general, industry and domestic water rights are more senior to agriculture and environmental rights.
-
-To create this data visualization, I summed and aggregated appropriated water flow (CFS) into the four included designated uses for each decade. The descriptive title is color-coordinated, highlighting industrial and domestic uses, which have more rights and older rights than the other two categories. The subtitle reminds the viewer that older water rights are more senior and are prioritized when water is scarce to put the data into context. I also chose to modify the y-axis tick marks from the default "100000" to "100K" format to reduce the data-ink ratio and improve simplicity. I used the classic theme to create a clean, minimalistic design with axis lines that help guide the viewer's eye while focusing on the data.
-
-The colors selected to represent each of the designated uses was based the standard color palette of the National Land Cover Database. It is typical to see residential areas represented in red, industrial in a dark gray, and agriculture in tan. I opted to represent the environment as blue, because typically environmental water rights are used to maintain in-stream flow or keeping water in the creeks or rivers where they would otherwise be diverted to sustain riparian plants, fish and other aquatic species. In selecting these colors, I also considered accessibility, aiming to maximize contrast and use colorblind-friendly palettes.
+1.  **Graphic form:** My second graphic is a bar graph that shows the added water appropriations for different designated uses (domestic, environment, industrial, and agriculture) in each decade between the 1930s and 1990s. To create this data visualization, I summed and aggregated appropriated water flow (CFS) into the four included designated uses for each decade.
+2.  **Text:** The descriptive title highlights that industrial and domestic uses have more rights and older rights than the other two categories. The subtitle reminds the viewer that older water rights are more senior and are prioritized when water is scarce to put the data into context. I also chose to modify the y-axis tick marks from the default "100000" to "100K" format to reduce the data-ink ratio and improve simplicity.
+3.  **Theme:** I used the classic theme to create a clean, minimalistic design with axis lines that help guide the viewer's eye while focusing on the data.
+4.  **Typography:** The descriptive title is color-coordinated, highlighting industrial and domestic uses, which have more rights and older rights than the other two categories. I kept the default sans serif font, because there was a lot of text on the final infographic, and I thought this was the easiest font to read on a screen, which is where my infographic will be viewed.
+5.  **General Design:** Despite feedback that this bar graph may "be a bit overwhelming to interpret", I opted to keep the bar plot unfaceted with bars of each designated use for each decade along the single x-axis. I felt that maintaining this structure was critical to communicating the primary of the message, that older rights trend more towards industrial and domestic use, whereas environmental water rights did not become popularized until the mid-1900s.
+6.  **Context:** In California, older water rights are more senior. This means that in times of water scarcity, a regular occurrence in western U.S., those who own senior water rights will receive the entirety of their allotment while more junior water users will not receive any water at all.
+7.  **Primary message:** The purpose of this graphic is to show which sectors have most of the older water rights. In general, industry and domestic water rights are more senior to agriculture and environmental rights. This is evident in the data. It is also emphasized in that industrial and domestic bars have the boldest colors, and the title states this key takeaway directly.
+8.  **Colors:** The colors selected to represent each of the designated uses was based the standard color palette of the National Land Cover Database. It is typical to see residential areas represented in red, industrial in a dark gray, and agriculture in tan. I opted to represent the environment as blue, because typically environmental water rights are used to maintain in-stream flow or keeping water in the creeks or rivers where they would otherwise be diverted to sustain riparian plants, fish and other aquatic species.
+9.  **Accessibility:** I considered color-blindness in selecting the colors by aiming to maximize contrast.
+10. **DEI lens:** This data does not represent people or communities, so I did not consider framing from a DEI perspective.
 
 ```{r}
 #| eval: true
@@ -190,11 +215,16 @@ ggplot(data = ca_rights_use,
 
 ### Plot 3: Relative change in appropriated water volume and annual runoff
 
-My third and final graphic is a line graph which shows how the cumulative appropriated water flows has grown between 1930 and 1999 for each of the four designated uses (environment, agriculture, domestic, and industry). The purpose of this graphic is to show how water-intensive the growth of industry was in the 1900s compared to other sectors.
-
-For consistency, I kept the same color palette and classic theme that I used in Plot 2. I opted to use color-coded labels in place of a legend to reduce viewer eye movement. I also added qualitative y-axis labels and horizontal dotted lines to provide means of comparison for the viewer to interpret appropriated flow rates in cubic feet per second. I made these horizontal lines dotted, light gray, and behind the designated use lines, to indicate to the reader that this information is secondary should be looked at after observing the growth trends of each designated use.
-
-I used text in this figure includes a title, subtitle, and caption. I aimed for simplicity in the title because the graph has a lot of components and may be confusing to a viewer without prior knowledge of the subject matter. The subtitle points the viewer to consider the horizontal lines and qualitative axes labels that provide context to compare flow rates of California water rights to the flow out of the Oroville Dam, the tallest dam in the United States, and the Amazon River, the fastest river in the world.
+1.  **Graphic form:** My third and final graphic is a line graph which shows how the cumulative appropriated water flows has grown between 1930 and 1999 for each of the four designated uses (environment, agriculture, domestic, and industry).
+2.  **Text:** I opted to use color-coded labels in place of a legend to reduce viewer eye movement. I used text in this figure includes a title, subtitle, and caption. I aimed for simplicity in the title because the graph has a lot of components and may be confusing to a viewer without prior knowledge of the subject matter. The subtitle points the viewer to consider the horizontal lines and qualitative axes labels that provide context to compare flow rates of California water rights to the flow out of the Oroville Dam, the tallest dam in the United States, and the Amazon River, the fastest river in the world.
+3.  **Theme:** I used the classic theme to create a clean, minimalistic design with axis lines that help guide the viewer's eye while focusing on the data. I also added qualitative y-axis labels and horizontal dotted lines to provide means of comparison for the viewer to interpret appropriated flow rates in cubic feet per second. I made these horizontal lines dotted, light gray, and behind the designated use lines, to indicate to the reader that this information is secondary should be looked at after observing the growth trends of each designated use.
+4.  **Typography:** I kept the default sans serif font, because there was a lot of text on the final infographic, and I thought this was the easiest font to read on a screen, which is where my infographic will be viewed.
+5.  **General Design:** I selected a theme with no gridlines to reduce the data-ink ratio, especially considering there are 6 lines representing data already on the figure. I added the dotted, gray, horizontal lines behind the solid designated use growth lines, to indicate to the viewer to look at this information after focusing on the primary message, the growth of appropriated water to the four designated uses. I kept the data source in the caption for this figure only because of its location in the bottom right corner of the infographic, and removed it elsewhere to avoid redundant text.
+6.  **Context:** I added qualitative y-axis labels and the dotted, gray, horizontal lines to provide a point of reference for interpreting flow rates in cubic feet per second (CFS).
+7.  **Primary message:** The purpose of this graphic is to show how water-intensive the growth of industry was in the 1900s compared to other sectors. This is evident in the data and also stated explicitly in the figure subtitle.
+8.  **Colors:** For consistency, I kept the same color palette that I used for designated water use in Plot 2.
+9.  **Accessibility:** I considered color-blindness in selecting the colors by aiming to maximize contrast.
+10. **DEI lens:** This data does not represent people or communities, so I did not consider framing from a DEI perspective.
 
 ```{r}
 #| eval: true
@@ -299,8 +329,6 @@ ggplot() +
 ### Putting it all together
 
 I created the infographic manually using Microsoft PowerPoint. I added each of the three figures to a blank slide and added supporting text, diagrams, and icons to highlight important takeaways and provide context to viewers.
-
-![](infographic.png)
 
 #### To view the code used to create each of the three figures, click the drop down arrows below
 
